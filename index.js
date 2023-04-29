@@ -11,6 +11,9 @@ const app = express();
 
 app.use(express.json());
 
+app.get('/', (req, res) =>{
+    res.send("Welcome")
+})
 
 app.use('/user', userRouter)
 app.use('/restaurant', restaurantrRouter);
