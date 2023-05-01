@@ -1,6 +1,8 @@
 const express = require("express");
 const { Restaurant } = require("../models/restaurent.mode");
-const fs=require('fs')
+const fs = require('fs');const { ObjectId } = require("mongodb");
+ 4
+// const ObjectId = require('mongodb').ObjectId;
 
 const restaurantrRouter = express.Router();
 
@@ -28,13 +30,11 @@ restaurantrRouter.get('/api/restaurants/:id', async (req, res) => {
 })
 
 restaurantrRouter.get('/api/restaurants/:id/menu', async (req, res) => {
-    let id=req.params.id
+    let id =  new ObjectId(req.params.id);
+    console.log(id);
     try {
-        let rest = await Restaurant.find({ '_id': id });
-        for (let el of rest) {
-            res.status(200).send({"Single Resturants":el.menu})
-        }
-        // console.log(menu);
+        let rest = await Restaurant.findById(id);
+        res.status(201).send(rest.menu);
         
 
     } catch (error) {
@@ -44,19 +44,37 @@ restaurantrRouter.get('/api/restaurants/:id/menu', async (req, res) => {
 })
 
 // Post
-
 restaurantrRouter.post('/api/restaurants/:id/menu', async (req, res) => {
-    let id = req.params.id
     let payload = req.body;
+    console.log(payload);
+    let id = new ObjectId(req.params.id);
+    console.log(id);
     try {
-        let rest = await Restaurant.find({ '_id': id });
+        let rest = await Restaurant.findByIdAndUpdate(id, { $push: { menu: payload } });
+        res.send(rest);
         console.log(rest);
-            // let data = el.menu.push(payload);
-            // let newData = Restaurant({data});
-            // await newData.save();
-            // res.status(201).send("Menu updated")
-        // }
+        // let data = new Restaurant(newData);
+        // await data.save();
+        // res.status(201).send({ "msg":"Menu updated",menu:data})
+        
 
+    } catch (error) {
+        res.status(400).send({ "Error": error.message });
+        console.log(error);
+    }
+});
+
+restaurantrRouter.delete('/api/restaurants/:id/menu/:id', async (req, res) => {
+    // let payload = req.body;
+    // console.log(payload);
+    // let id =  new ObjectId(req.params.id);
+    let id=req.params.id
+    try {
+         await Restaurant.findByIdAndDelete({'_id':id},);
+         res.status(201).send({ "msg":"Menu deleted from Restaurant"})
+        // let data = new Restaurant(newData);
+        // await data.save();
+        // res.status(201).send({ "msg":"Menu updated",menu:data})
         
 
     } catch (error) {
@@ -64,6 +82,7 @@ restaurantrRouter.post('/api/restaurants/:id/menu', async (req, res) => {
         console.log(error);
     }
 })
+
 
 
 restaurantrRouter.post('/api/restaurants', async(req,res) => {
